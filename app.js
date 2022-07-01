@@ -31,10 +31,6 @@ app.get('/', (req, res) => {
   res.render('pages/index.ejs', { products: [], title: 'Productos' });
 });
 
-app.get('/chat', (req, res) => {
-  res.sendFile(__dirname + '/public/chat.html');
-});
-
 io.on('connection', (channel) => {
   emitChat();
   emitProduct();
@@ -52,10 +48,12 @@ io.on('connection', (channel) => {
 
 const emitChat = async () => {
   const chat = await chatTable.getAll();
+  console.log(chat);
   io.sockets.emit('chat', chat);
 };
 const emitProduct = async () => {
   const products = await chatTable.getAll();
+  console.log(products);
   io.sockets.emit('products-inner', products);
 };
 

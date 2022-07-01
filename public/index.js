@@ -44,6 +44,8 @@ function sendMessage() {
 }
 
 socket.on('chat', (message) => {
+  if (!message.length) return;
+
   const dateTime = new Date().toISOString();
   const [date, time] = dateTime.split('T');
   const [YYYY, MM, DD] = date.split('-');
@@ -61,6 +63,7 @@ socket.on('chat', (message) => {
 });
 
 socket.on('products-inner', (products) => {
+  if (!products.length) return;
   const headers = [
     `
         <tr class="text-light">
