@@ -3,14 +3,14 @@ const { options } = require('../options/SQLite3.js');
 const knex = require('knex')(options);
 
 knex.schema
-  .dropTableIfExists('chat')
+  .dropTableIfExists('chats')
   .then(() => console.log('se elimina tabla chat'))
   .catch((e) => console.error('Error al eliminar tabla chat: ', e))
   .finally((x) => knex.destroy());
 
 // Tabla mensajes
 knex.schema
-  .createTable('chat', (table) => {
+  .createTable('chats', (table) => {
     table.increments('id').primary();
     table.string('name');
     table.string('message');

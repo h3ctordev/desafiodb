@@ -4,11 +4,10 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
-const db = require('./utils/Contenedor');
+const Chat = require('./model/chat');
+const Products = require('./model/products');
 
 const port = 8080;
-const chatTable = new db('chat');
-const productsTable = new db('products');
 
 // [
 //   {
@@ -27,34 +26,53 @@ app.use(express.static('public'));
 app.set('views', './public/views');
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-  res.render('pages/index.ejs', { products: [], title: 'Productos' });
+app.get('/', async (req, res) => {
+  try {
+    const products = await Products.findAll({ raw: true });
+    return res.render('pages/index.ejs', { products, title: 'Productos' });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 });
 
 io.on('connection', (channel) => {
   emitChat();
   emitProduct();
-  channel.on('incomingMessage', async (message) => {
-    console.log(message);
-    await chatTable.insert([message]);
-    await emitChat();
-  });
-  channel.on('addProduct', async (product) => {
-    console.log(product);
-    await productsTable.insert([product]);
-    await emitProduct();
-  });
+  try {
+    channel.on('incomingMessage', async (message) => {
+      await Chat.create({ ...message, timestamp: new Date() });
+      await emitChat();
+    });
+    channel.on('addProduct', async (product) => {
+      await Products.create({ ...product });
+      await emitProduct();
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 });
 
 const emitChat = async () => {
-  const chat = await chatTable.getAll();
-  console.log(chat);
-  io.sockets.emit('chat', chat);
+  try {
+    const chat = await Chat.findAll({ raw: true });
+    io.sockets.emit('chat', chat);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 const emitProduct = async () => {
-  const products = await chatTable.getAll();
-  console.log(products);
-  io.sockets.emit('products-inner', products);
+  try {
+    const products = await Products.findAll({
+      raw: true,
+    });
+    io.sockets.emit('products-inner', products);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 server.listen(port, () => {

@@ -54,10 +54,14 @@ socket.on('chat', (message) => {
   const _dateTime = `${YYYY}/${MM}/${DD} ${HH}:${mm}:${ss.slice(0, 2)}`;
 
   const texto = message
-    .map(
-      (mensaje) =>
-        `<div> <strong> ${mensaje.name} [${_dateTime}] :</strong> <em>${mensaje.message}</em></div>`
-    )
+    .map((mensaje) => {
+      const datetime = new Date(mensaje.timestamp);
+      return `<div> <strong> ${
+        mensaje.name
+      } [${datetime.toLocaleString()}] :</strong> <em>${
+        mensaje.message
+      }</em></div>`;
+    })
     .join(' ');
   document.getElementById('messages').innerHTML = texto;
 });
